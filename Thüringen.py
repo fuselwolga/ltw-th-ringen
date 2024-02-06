@@ -9,6 +9,10 @@ import math
 import datetime
 from dplython import (DplyFrame, X, select, sift,arrange)
 
+app = Dash(__name__, external_stylesheets = [dbc.themes.BOOTSTRAP])
+server = app.server
+
+
 th = pd.read_html("https://www.wahlrecht.de/umfragen/landtage/thueringen.htm")
 
 df_new = th[1]
@@ -157,8 +161,7 @@ Sonntagsfrage.update_layout(yaxis_title=None,
 
 #%% DASHboard
 
-app = Dash(__name__, external_stylesheets = [dbc.themes.BOOTSTRAP])
-server = app.server
+
 
 app.layout = html.Div(
     [
