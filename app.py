@@ -12,6 +12,7 @@ from dplython import (DplyFrame, X, select, sift,arrange)
 app = Dash(__name__, external_stylesheets = [dbc.themes.BOOTSTRAP])
 server = app.server
 
+pd.options.mode.chained_assignment = None  # default='warn'
 
 th = pd.read_html("https://www.wahlrecht.de/umfragen/landtage/thueringen.htm")
 
