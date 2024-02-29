@@ -135,17 +135,16 @@ Sitzverteilungen.update_layout(bargap=0,
                                paper_bgcolor = "#f9f9f9")
 
 ## Graph Sonntagsfrage
-aktuelleUmfrage = DplyFrame(df)
-aktuelleUmfrage = aktuelleUmfrage >>\
-    sift(X.Datum_str == dfIndex.loc[len(dfIndex)-1,'Datum_str']) >> \
-    select(X.Datum_str,X.CDU,X.SPD,X.GRÜNE,X.LINKE,X.FDP,X.AfD,X.Sonstige)
+aktuelleUmfrage = df.tail(1)
+aktuelleUmfrage = aktuelleUmfrage[["Datum_str","CDU","SPD","GRÜNE","LINKE","FDP","AfD","Sonstige"]]
 aktuelleUmfrage = pd.melt(aktuelleUmfrage,
         id_vars = 'Datum_str',
         value_vars=["CDU", "SPD", "GRÜNE", "FDP", "LINKE", "AfD","Sonstige"])
 aktuelleUmfrage.rename(columns = {"value":"Prozent",
                                   "variable":"Partei"},inplace = True)
-aktuelleUmfrage["Sonstige"] = aktuelleUmfrage["Partei"].apply(lambda x: x == "Sonstige")
-aktuelleUmfrage = aktuelleUmfrage >> arrange(X.Sonstige,-X.Prozent)
+aktuelleUmfrage = pd.concat([aktuelleUmfrage.iloc[:-1].sort_values(by="Prozent",ascending=False),
+                             aktuelleUmfrage.iloc[-1:]])
+
 
 Sonntagsfrage = px.bar(aktuelleUmfrage,
                        x = "Partei",
