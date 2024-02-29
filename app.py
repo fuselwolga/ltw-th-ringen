@@ -27,34 +27,41 @@ df = df[df["Institut"] != "Institut"]
 
 
 # Parteiwerte in Zahlenformat bringen # Sonstige lass ich erst einmal aus
-df["CDU"] = df["CDU"].str.replace(" %","").str.replace(",",".").astype("float64")
-df["SPD"] = df["SPD"].str.replace(" %","").str.replace(",",".").str.replace("?","").astype("float64")
-df["GRÜNE"] = df["GRÜNE"].str.replace(" %","").str.replace(",",".").astype("float64")
-df["FDP"] = df["FDP"].str.replace(" %","").str.replace(",",".").str.replace("–","nan").astype("float64")
-df["LINKE"] = df["LINKE"].str.replace(" %","").str.replace(",",".").str.replace("310","31").astype("float64")
-df["AfD"] = df["AfD"].str.replace(" %","").str.replace(",",".").str.replace("–","nan").astype("float64")
+Parteien = ["CDU","SPD","GRÜNE","FDP","LINKE","AfD"]
 
-# Es gibt noch Duplikate. Diese nun raus
+for col in Parteien:
+    df[col] = df[col].str.replace(" %","").str.replace(",",".")
+    df[col] = df[col].str.replace("?","").str.replace("310","31")
+    df[col] = df[col].str.replace("–","nan").astype(float)
+    
+
+
+# Es gibt noch Duplikate. Datum dient als ID
 df.drop_duplicates(inplace = True)
+
 
 # Sonstige hinzufügen
 df["Sonstige"] = 100 - np.nansum([df["CDU"],df["SPD"],df["GRÜNE"],df["LINKE"],df["FDP"],df["AfD"]],axis=0)
+
 
 # Farben
 party_colors = {'CDU':'black','SPD':'red','GRÜNE':'green','FDP':'gold','AfD':'#009ee0','LINKE':'purple','Sonstige':'lightgray'}
 sitze_party_colors = {'SitzeFinalCDU':'black','SitzeFinalSPD':'red','SitzeFinalGRÜNE':'green','SitzeFinalFDP':'gold','SitzeFinalAfD':'#009ee0','SitzeFinalLINKE':'purple'}
 
+
 # Datum ändern
-df["Datum"] = df["Datum"].str.replace("Sept. 2004","01.09.2004").str.replace("Landtagswahl am ","")
+df["Datum"] = df["Datum"].str.replace("Sept. 2004","01.09.2004").str.replace("Landtagswahl am ","") # 
 df["Datum"] = pd.to_datetime(df["Datum"],format = "%d.%m.%Y")
 df["Datum_str"] = df["Datum"].dt.strftime("%d.%m.%Y")
 df = df.set_index('Datum')
 df["Datum"] = df.index
 df = df[::-1] # Reihenfolge ändern, damit für Balkendiagramme älteste Umfrage zuerst kommt
 
+
 # eindeutige ID
 df["Institut"] = df["Institut"].str.replace("- ","")
 df["Umfrage"] = df["Datum_str"] + " " + df["Institut"]
+
 
 # Sitze für alle # ist outdated sobald umrechungsverfahren fertig ist
 for col in ["CDU", "SPD", "GRÜNE", "FDP", "LINKE", "AfD"]:
@@ -113,6 +120,7 @@ subset = df[["Differenz",
              "integerAfD", "decimalAfD", "decimalAfD_rank","SitzeFinalAfD"]] 
 
 dfIndex = df.reset_index(drop=True)
+
 ## Graph Sitzverteilungen
 Sitzverteilungen = px.bar(df,x = "Umfrage",
              y = ["SitzeFinalCDU","SitzeFinalSPD","SitzeFinalGRÜNE","SitzeFinalLINKE","SitzeFinalFDP","SitzeFinalAfD"],
