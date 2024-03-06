@@ -46,7 +46,11 @@ for col in Parteien:
 # Es gibt noch Duplikate. Datum dient als ID
 df.drop_duplicates(inplace = True)
 
-
+hintergrundFarbe = "#141b2d"
+kachelFarbe = "#1f2940"
+textFarbe = "#dfdfe2"
+schattenFarbe = "#101417"
+gridFarbe = "#5f6b87"
 
 
 
@@ -60,7 +64,7 @@ party_colors = {'CDU':'black','SPD':'red','GRÜNE':'green','FDP':'gold','AfD':'#
 sitze_party_colors = {'SitzeFinalCDU':'black','SitzeFinalSPD':'red','SitzeFinalGRÜNE':'green',
                       'SitzeFinalFDP':'gold','SitzeFinalAfD':'#009ee0','SitzeFinalLINKE':'purple',
                       'SitzeFinalBSW':"#e97314",
-                      'Dummy':'#f9f9f9','Rest':'#f9f9f9'}
+                      'Dummy':kachelFarbe,'Rest':kachelFarbe}
 
 
 # Datum ändern
@@ -80,6 +84,7 @@ df["Umfrage"] = df["Datum_str"] + " " + df["Institut"]
 # Sitze für alle # ist outdated sobald umrechungsverfahren fertig ist
 for col in Parteien:
     df[f"Sitze{col}"] = df[col] * 88 / 100
+
 
 
 #%% Hare/Niemeyer
@@ -157,7 +162,7 @@ Sonntagsfrage = px.bar(aktuelleUmfrage,
                        color = "Partei",
                        color_discrete_map = party_colors,
                        text_auto=True,
-                       template = "plotly_white")
+                       template = "plotly_dark")
 Sonntagsfrage.update_traces(textfont_size=12, textangle=0, textposition="outside", cliponaxis=False,
                             hovertemplate=None,hoverinfo='skip',
                             marker_line_width = 0,
@@ -165,56 +170,72 @@ Sonntagsfrage.update_traces(textfont_size=12, textangle=0, textposition="outside
 Sonntagsfrage.update_xaxes(visible = True)
 Sonntagsfrage.update_layout(yaxis_title=None,
                             xaxis_title=None,
+                            yaxis_gridcolor=gridFarbe,
                             bargap = 0.3,
                             showlegend = False,
-                            plot_bgcolor = "#f9f9f9",
-                            paper_bgcolor = "#f9f9f9")
+                            font_color = textFarbe,
+                            plot_bgcolor = kachelFarbe,
+                            paper_bgcolor = kachelFarbe)
 
 
 
 # index for df
 df["count"] = range(len(df))
 
+# Tage bis zur Wahl berechnen
+today = datetime.datetime.today()
+wahltag = datetime.datetime.strptime('2024-09-01 08:00:00', '%Y-%m-%d %H:%M:%S')
+tagenoch = wahltag - today
 #%% DASHboard
-
-
-
 app.layout = html.Div(
     [
          html.H1("Dashboard zur Landtagswahl in Thüringen 2024",
-                 style = {"textAlign":"center"}),
+                 style = {"textAlign":"center",
+                          "color":textFarbe}),
+         html.H4(f"Die Wahllokale öffnen in {tagenoch.days} Tagen",
+                 style = {"textAlign":"center",
+                          "color":textFarbe}),
          dbc.Row(
              [
                  dbc.Col(
                      [
-                         html.H3("Wenn morgen Landtagswahl wäre..."),
-                         html.Label(f"Die aktuellste Umfrage zur Landtagswahl vom {dfIndex.loc[len(dfIndex)-1,'Datum_str']} ({dfIndex.loc[len(dfIndex)-1,'Institut']})"),
+                         html.H3("Wenn morgen Landtagswahl wäre",
+                                 style ={"color":textFarbe}),
+                         html.Label(f"Die aktuellste Umfrage zur Landtagswahl vom {dfIndex.loc[len(dfIndex)-1,'Datum_str']} ({dfIndex.loc[len(dfIndex)-1,'Institut']})",
+                                    style ={"color":textFarbe}),
                          dcc.Graph(figure = Sonntagsfrage)
-                     ], width = 5,style = {"backgroundColor":"#f9f9f9",
-                                           "boxShadow": "3px 3px 3px lightgrey",
+                     ], width = 5,style = {"backgroundColor":kachelFarbe,
+                                           "boxShadow": f"4px 4px 4px {schattenFarbe}",
                                            "margin": "5px",
                                            "paddingTop":"15px",
                                            "paddingLeft":"20px"}
                  ),
                  dbc.Col(
                      [
-                         html.H3("Umfragewerte der Thüringer Parteien seit 1999"),
+                         html.H3("Umfragewerte der Thüringer Parteien seit 1999",
+                                 style ={"color":textFarbe}),
                          dbc.RadioItems(options = ["Umfragewerte","Hypothetische Sitzverteilungen"],
                                         value = "Umfragewerte",
                                         id = "graphType",
-                                        inline = True),
+                                        inline = True,
+                                        style ={"color":textFarbe}),
                          html.Caption(" "),
-                         html.H6(id = "Zeitraum"),
+                         html.H6(id = "Zeitraum",
+                                 style ={"color":textFarbe}),
                          dcc.RangeSlider(min = df["count"].min(),max = df["count"].max()+1,
-                                 #       marks = {numd:date.strftime('%d/%m') for numd,date in zip(numdate, df['Datum'].dt.date.unique())},
-                                         marks = None,
+                                         marks = {
+                                             2:{'label':"Wahl 1999",'style':{'color':textFarbe}},
+                                             31:{'label':"Wahl 2004",'style':{'color':textFarbe}},
+                                             66:{'label':"Wahl 2009",'style':{'color':textFarbe}},
+                                             85:{'label':"Wahl 2014",'style':{'color':textFarbe}},
+                                             119:{'label':"Wahl 2019",'style':{'color':textFarbe}}}, 
                                          value = [df["count"].min(),df["count"].max()],
                                          id = "selectTime",
-                    #                     tooltip={"placement": "bottom", "always_visible": True}
+                                         allowCross = False,
                                        ),
                          dcc.Graph(id = "Umfragewerte")
-                     ], width = 6,style = {"backgroundColor":"#f9f9f9",
-                                           "boxShadow": "3px 3px 3px lightgrey",
+                     ], width = 6,style = {"backgroundColor":kachelFarbe,
+                                           "boxShadow": f"4px 4px 4px {schattenFarbe}",
                                            "margin": "5px",
                                            "paddingTop":"15px",
                                            "paddingLeft":"20px"}
@@ -229,7 +250,7 @@ app.layout = html.Div(
 #                          html.H4("Sitzverteilungen anhand von Umfragewerten"),
 #                          html.Label("Umrechnung der Stimmen nach Hare/Niemeyer unter Berücksichtung der 5%-Hürde"),
 #                          dcc.Graph(figure = Sitzverteilungen)
-#                      ],width = 8,style = {"backgroundColor":"#f9f9f9",
+#                      ],width = 8,style = {"backgroundColor":kachelFarbe,
 #                                            "boxShadow": "3px 3px 3px lightgrey",
 #                                            "margin": "5px",
 #                                            "paddingTop":"15px",
@@ -238,7 +259,8 @@ app.layout = html.Div(
 # =============================================================================
                  dbc.Col(
                      [
-                         html.H4("Koalitionsrechner"),
+                         html.H4("Koalitionsrechner",
+                                 style ={"color":textFarbe}),
                          dcc.Dropdown(id ="dropdownUmfrage",
                                       options = dfIndex["Umfrage"],
                                       value = dfIndex.loc[len(dfIndex)-1,'Umfrage'],
@@ -254,18 +276,22 @@ app.layout = html.Div(
                                 value=[],
                                 id="switchesInput",
                                 switch=True,
-                                inline = True),
+                                inline = True,
+                                style ={"color":textFarbe}),
                          dcc.Graph(id="Koalitionsrechner")
-                     ], width = 3,style = {"backgroundColor":"#f9f9f9",
-                                           "boxShadow": "3px 3px 3px lightgrey",
+                     ], width = 3,style = {"backgroundColor":kachelFarbe,
+                                           "boxShadow": f"4px 4px 4px {schattenFarbe}",
                                            "margin": "5px",
                                            "paddingTop":"15px",
                                            "paddingLeft":"20px"}
                  ),                       
              ]
-         )
-     ],style = {"backgroundColor":"#f2f2f2",
-                "border":"100px solid #f2f2f2"}
+         ),
+     html.H6("Quelle: https://www.wahlrecht.de/umfragen/landtage/thueringen.htm",style = {"marginTop":"60px",
+                                                                                          "textAlign":"right",
+                                                                                          "color":textFarbe})
+     ],style = {"backgroundColor":hintergrundFarbe,
+                "border":f"100px solid {hintergrundFarbe}"}
 )
 
 # Sonntagsfrage
@@ -285,16 +311,20 @@ def chooseGraphType(graphType,selectTime):
     if graphType == "Umfragewerte":
         fig = px.line(subTime, x = "Datum",y = ["Sonstige","CDU","SPD","GRÜNE","LINKE","FDP","AfD","BSW"],
                       color_discrete_map = party_colors,
-                      markers = True,
-                      template = "simple_white")
+                      markers = False,
+                      template = "plotly_dark")
         fig.update_yaxes(showgrid=True)
         fig.update_xaxes(range = [min(subTime["Datum"]) - datetime.timedelta(days=50),
                                   max(subTime["Datum"]) + datetime.timedelta(days=100)] )
-        fig.update_layout(showlegend = False,
+        fig.update_layout(yaxis_range = [0,60],
+                          showlegend = True,
                           yaxis_title=None,
                           xaxis_title=None,
-                          plot_bgcolor = "#f9f9f9",
-                          paper_bgcolor = "#f9f9f9")
+                          xaxis_gridcolor=kachelFarbe,
+                          yaxis_gridcolor=gridFarbe,
+                          font_color = textFarbe,
+                          plot_bgcolor = kachelFarbe,
+                          paper_bgcolor = kachelFarbe)
         return fig
     elif graphType == "Hypothetische Sitzverteilungen":
         ## Graph Sitzverteilungen
@@ -303,12 +333,13 @@ def chooseGraphType(graphType,selectTime):
                      color_discrete_map = sitze_party_colors)
         Sitzverteilungen.update_traces(marker_line_width = 0.05)
         Sitzverteilungen.update_xaxes(showticklabels = False,linecolor = "gray",mirror = True)
-        Sitzverteilungen.update_yaxes(range = [0,88])
-        Sitzverteilungen.update_layout(bargap=0,
+        Sitzverteilungen.update_layout(yaxis_range = [0,88],
+                                       bargap=0,
                                        showlegend = False,
                                        yaxis_title=None,
-                                       plot_bgcolor = "#f9f9f9",
-                                       paper_bgcolor = "#f9f9f9")
+                                       font_color = textFarbe,
+                                       plot_bgcolor = kachelFarbe,
+                                       paper_bgcolor = kachelFarbe)
         return Sitzverteilungen
 
 # Zeitraum angeben für Umfragen
@@ -367,17 +398,18 @@ def Koalitionsrechner(switchesInput,dropdownUmfrage):
                           direction="clockwise",
                           rotation=270,
                           marker = dict(colors = cols,
-                                        line=dict(color='#f9f9f9', width=3)),
+                                        line=dict(color=kachelFarbe, width=3)),
                           sort = False,
                           textinfo = "value",
-                          textfont= dict(color = "#f9f9f9") ,
+                          textfont= dict(color = kachelFarbe) ,
                           hoverinfo="none",
                           )
                    )
      
      fig.update_layout(showlegend=False,
-                       plot_bgcolor = "#f9f9f9",
-                       paper_bgcolor = "#f9f9f9",
+                       plot_bgcolor = kachelFarbe,
+                       paper_bgcolor = kachelFarbe,
+                       font_color = textFarbe,
                        autosize = True,
                        annotations =[dict(text=f'{int(summe)} von 45 benötigten Mandaten', x=0.5, y=0.4, font_size=20, showarrow=False)])
 #     fig.add_hline(y=44,line_width=1.5, line_dash="dash", line_color="gray")
