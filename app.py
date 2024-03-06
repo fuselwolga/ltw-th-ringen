@@ -167,7 +167,8 @@ Sonntagsfrage.update_traces(textfont_size=12, textangle=0, textposition="outside
                             hovertemplate=None,hoverinfo='skip',
                             marker_line_width = 0,
                             marker_line_color = "gray")
-Sonntagsfrage.update_xaxes(visible = True)
+Sonntagsfrage.update_xaxes(visible = True,fixedrange = True)
+Sonntagsfrage.update_yaxes(visible = True,fixedrange = True)
 Sonntagsfrage.update_layout(yaxis_title=None,
                             xaxis_title=None,
                             yaxis_gridcolor=gridFarbe,
@@ -199,19 +200,6 @@ app.layout = html.Div(
              [
                  dbc.Col(
                      [
-                         html.H3("Wenn morgen Landtagswahl wäre",
-                                 style ={"color":textFarbe}),
-                         html.Label(f"Die aktuellste Umfrage zur Landtagswahl vom {dfIndex.loc[len(dfIndex)-1,'Datum_str']} ({dfIndex.loc[len(dfIndex)-1,'Institut']})",
-                                    style ={"color":textFarbe}),
-                         dcc.Graph(figure = Sonntagsfrage)
-                     ], width = 5,style = {"backgroundColor":kachelFarbe,
-                                           "boxShadow": f"4px 4px 4px {schattenFarbe}",
-                                           "margin": "5px",
-                                           "paddingTop":"15px",
-                                           "paddingLeft":"20px"}
-                 ),
-                 dbc.Col(
-                     [
                          html.H3("Umfragewerte der Thüringer Parteien seit 1999",
                                  style ={"color":textFarbe}),
                          dbc.RadioItems(options = ["Umfragewerte","Hypothetische Sitzverteilungen"],
@@ -234,57 +222,58 @@ app.layout = html.Div(
                                          allowCross = False,
                                        ),
                          dcc.Graph(id = "Umfragewerte")
+                     ], width = 7,style = {"backgroundColor":kachelFarbe,
+                                           "boxShadow": f"4px 4px 4px {schattenFarbe}",
+                                           "margin": "5px",
+                                           "paddingTop":"15px",
+                                           "paddingLeft":"20px"}
+                 ),
+                dbc.Col(
+                    [
+                        html.H4("Koalitionsrechner",
+                                style ={"color":textFarbe}),
+                        dcc.Dropdown(id ="dropdownUmfrage",
+                                     options = dfIndex["Umfrage"],
+                                     value = dfIndex.loc[len(dfIndex)-1,'Umfrage'],
+                                     style = {"marginRight":"50%"}),
+                        dbc.Checklist(
+                               options=[{"label": "CDU", "value": "SitzeFinalCDU"},
+                                        {"label": "SPD", "value": "SitzeFinalSPD"},
+                                        {"label": "LINKE", "value": "SitzeFinalLINKE"},
+                                        {"label": "GRÜNE", "value": "SitzeFinalGRÜNE"},
+                                        {"label": "FDP","value":"SitzeFinalFDP"},
+                                        {"label": "AfD","value":"SitzeFinalAfD"},
+                                        {"label": "BSW","value":"SitzeFinalBSW"}],
+                               value=[],
+                               id="switchesInput",
+                               switch=True,
+                               inline = True,
+                               style ={"color":textFarbe}),
+                        dcc.Graph(id="Koalitionsrechner")
+                    ], width = 4,style = {"backgroundColor":kachelFarbe,
+                                          "boxShadow": f"4px 4px 4px {schattenFarbe}",
+                                          "margin": "5px",
+                                          "marginLeft":"40px",
+                                          "paddingTop":"15px",
+                                          "paddingLeft":"20px"}
+                )
+             ],style = {"marginTop":"60px"}
+         ),
+         dbc.Row(
+             [
+                 dbc.Col(
+                     [
+                         html.H3("Wenn morgen Landtagswahl wäre",
+                                 style ={"color":textFarbe}),
+                         html.Label(f"Die aktuellste Umfrage zur Landtagswahl vom {dfIndex.loc[len(dfIndex)-1,'Datum_str']} ({dfIndex.loc[len(dfIndex)-1,'Institut']})",
+                                    style ={"color":textFarbe}),
+                         dcc.Graph(figure = Sonntagsfrage)
                      ], width = 6,style = {"backgroundColor":kachelFarbe,
                                            "boxShadow": f"4px 4px 4px {schattenFarbe}",
                                            "margin": "5px",
                                            "paddingTop":"15px",
                                            "paddingLeft":"20px"}
-                 )
-             ],style = {"marginTop":"60px"}
-         ),
-         dbc.Row(
-             [
-# =============================================================================
-#                  dbc.Col(
-#                      [
-#                          html.H4("Sitzverteilungen anhand von Umfragewerten"),
-#                          html.Label("Umrechnung der Stimmen nach Hare/Niemeyer unter Berücksichtung der 5%-Hürde"),
-#                          dcc.Graph(figure = Sitzverteilungen)
-#                      ],width = 8,style = {"backgroundColor":kachelFarbe,
-#                                            "boxShadow": "3px 3px 3px lightgrey",
-#                                            "margin": "5px",
-#                                            "paddingTop":"15px",
-#                                            "paddingLeft":"20px"}
-#                  ),
-# =============================================================================
-                 dbc.Col(
-                     [
-                         html.H4("Koalitionsrechner",
-                                 style ={"color":textFarbe}),
-                         dcc.Dropdown(id ="dropdownUmfrage",
-                                      options = dfIndex["Umfrage"],
-                                      value = dfIndex.loc[len(dfIndex)-1,'Umfrage'],
-                                      style = {"marginRight":"50%"}),
-                         dbc.Checklist(
-                                options=[{"label": "CDU", "value": "SitzeFinalCDU"},
-                                         {"label": "SPD", "value": "SitzeFinalSPD"},
-                                         {"label": "LINKE", "value": "SitzeFinalLINKE"},
-                                         {"label": "GRÜNE", "value": "SitzeFinalGRÜNE"},
-                                         {"label": "FDP","value":"SitzeFinalFDP"},
-                                         {"label": "AfD","value":"SitzeFinalAfD"},
-                                         {"label": "BSW","value":"SitzeFinalBSW"}],
-                                value=[],
-                                id="switchesInput",
-                                switch=True,
-                                inline = True,
-                                style ={"color":textFarbe}),
-                         dcc.Graph(id="Koalitionsrechner")
-                     ], width = 3,style = {"backgroundColor":kachelFarbe,
-                                           "boxShadow": f"4px 4px 4px {schattenFarbe}",
-                                           "margin": "5px",
-                                           "paddingTop":"15px",
-                                           "paddingLeft":"20px"}
-                 ),                       
+                 )                     
              ]
          ),
      html.H6("Quelle: https://www.wahlrecht.de/umfragen/landtage/thueringen.htm",style = {"marginTop":"60px",
@@ -313,14 +302,15 @@ def chooseGraphType(graphType,selectTime):
                       color_discrete_map = party_colors,
                       markers = False,
                       template = "plotly_dark")
-        fig.update_yaxes(showgrid=True)
+        fig.update_yaxes(showgrid=True,
+                         range = [0,55])
         fig.update_xaxes(range = [min(subTime["Datum"]) - datetime.timedelta(days=50),
-                                  max(subTime["Datum"]) + datetime.timedelta(days=100)] )
-        fig.update_layout(yaxis_range = [0,60],
-                          showlegend = True,
+                                  max(subTime["Datum"]) + datetime.timedelta(days=100)],
+                         color = gridFarbe)
+        fig.update_layout(showlegend = True,
+                          legend_title=None,
                           yaxis_title=None,
                           xaxis_title=None,
-                          xaxis_gridcolor=kachelFarbe,
                           yaxis_gridcolor=gridFarbe,
                           font_color = textFarbe,
                           plot_bgcolor = kachelFarbe,
@@ -331,8 +321,8 @@ def chooseGraphType(graphType,selectTime):
         Sitzverteilungen = px.bar(subTime,x = "Umfrage",
                      y = ["SitzeFinalCDU","SitzeFinalSPD","SitzeFinalGRÜNE","SitzeFinalLINKE","SitzeFinalFDP","SitzeFinalAfD","SitzeFinalBSW"],
                      color_discrete_map = sitze_party_colors)
-        Sitzverteilungen.update_traces(marker_line_width = 0.05)
-        Sitzverteilungen.update_xaxes(showticklabels = False,linecolor = "gray",mirror = True)
+        Sitzverteilungen.update_traces(marker_line_width = 0)
+        Sitzverteilungen.update_xaxes(showticklabels = False,linecolor = kachelFarbe,mirror = True)
         Sitzverteilungen.update_layout(yaxis_range = [0,88],
                                        bargap=0,
                                        showlegend = False,
@@ -384,10 +374,6 @@ def Koalitionsrechner(switchesInput,dropdownUmfrage):
      subSingle.rename(columns = {"value":"Prozent",
                                  "variable":"Partei"},inplace = True)
      
-    
-
-
- #    subSingle.sort_values(by = "value",inplace = True)
      cols = subSingle['Partei'].map(sitze_party_colors)
      fig = go.Figure()
      fig.add_trace(
@@ -404,8 +390,7 @@ def Koalitionsrechner(switchesInput,dropdownUmfrage):
                           textfont= dict(color = kachelFarbe) ,
                           hoverinfo="none",
                           )
-                   )
-     
+                   )     
      fig.update_layout(showlegend=False,
                        plot_bgcolor = kachelFarbe,
                        paper_bgcolor = kachelFarbe,
