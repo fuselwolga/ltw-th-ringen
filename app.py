@@ -59,10 +59,10 @@ df["Sonstige"] = 100 - np.nansum([df["CDU"],df["SPD"],df["GRÜNE"],df["LINKE"],d
 
 
 # Farben
-party_colors = {'CDU':'black','SPD':'red','GRÜNE':'green','FDP':'gold','AfD':'#009ee0',
-                'LINKE':'purple','BSW':'#e97314','Sonstige':'lightgray','Dummy':'white'}
-sitze_party_colors = {'SitzeFinalCDU':'black','SitzeFinalSPD':'red','SitzeFinalGRÜNE':'green',
-                      'SitzeFinalFDP':'gold','SitzeFinalAfD':'#009ee0','SitzeFinalLINKE':'purple',
+party_colors = {'CDU':'black','SPD':'#cb0100','GRÜNE':'green','FDP':'gold','AfD':'#009ee0',
+                'LINKE':'#642d75','BSW':'#e97314','Sonstige':'lightgray','Dummy':'white'}
+sitze_party_colors = {'SitzeFinalCDU':'black','SitzeFinalSPD':'#cb0100','SitzeFinalGRÜNE':'green',
+                      'SitzeFinalFDP':'gold','SitzeFinalAfD':'#009ee0','SitzeFinalLINKE':'#642d75',
                       'SitzeFinalBSW':"#e97314",
                       'Dummy':kachelFarbe,'Rest':kachelFarbe}
 
@@ -167,7 +167,8 @@ Sonntagsfrage.update_traces(textfont_size=12, textangle=0, textposition="outside
                             hovertemplate=None,hoverinfo='skip',
                             marker_line_width = 0,
                             marker_line_color = "gray")
-Sonntagsfrage.update_xaxes(visible = True,fixedrange = True)
+Sonntagsfrage.update_xaxes(visible = True,fixedrange = True,
+                           linecolor = gridFarbe)
 Sonntagsfrage.update_yaxes(visible = True,fixedrange = True)
 Sonntagsfrage.update_layout(yaxis_title=None,
                             xaxis_title=None,
@@ -302,11 +303,15 @@ def chooseGraphType(graphType,selectTime):
                       color_discrete_map = party_colors,
                       markers = False,
                       template = "plotly_dark")
+        fig.update_traces(line=dict(width=3))
         fig.update_yaxes(showgrid=True,
-                         range = [0,55])
+                         range = [0,55],
+                         fixedrange = True)
         fig.update_xaxes(range = [min(subTime["Datum"]) - datetime.timedelta(days=50),
                                   max(subTime["Datum"]) + datetime.timedelta(days=100)],
-                         color = gridFarbe)
+                         color = textFarbe,
+                         linecolor = gridFarbe,
+                         fixedrange = True,)
         fig.update_layout(showlegend = True,
                           legend_title=None,
                           yaxis_title=None,
@@ -322,7 +327,9 @@ def chooseGraphType(graphType,selectTime):
                      y = ["SitzeFinalCDU","SitzeFinalSPD","SitzeFinalGRÜNE","SitzeFinalLINKE","SitzeFinalFDP","SitzeFinalAfD","SitzeFinalBSW"],
                      color_discrete_map = sitze_party_colors)
         Sitzverteilungen.update_traces(marker_line_width = 0)
-        Sitzverteilungen.update_xaxes(showticklabels = False,linecolor = kachelFarbe,mirror = True)
+        Sitzverteilungen.update_xaxes(showticklabels = False,linecolor = kachelFarbe,
+                                      mirror = True,fixedrange = True)
+        Sitzverteilungen.update_yaxes(fixedrange = True)
         Sitzverteilungen.update_layout(yaxis_range = [0,88],
                                        bargap=0,
                                        showlegend = False,
@@ -344,8 +351,11 @@ def chooseTimeframe(selectTime):
     datemax = subTime.index.max().strftime('%d.%m.%Y')
     text = (f"Zeitraum: {datemin} - {datemax}")
     return text
-    
-    
+
+sitze_party_colors_text = {'SitzeFinalCDU':textFarbe,'SitzeFinalSPD':textFarbe,'SitzeFinalGRÜNE':textFarbe,
+                      'SitzeFinalFDP':textFarbe,'SitzeFinalAfD':textFarbe,'SitzeFinalLINKE':textFarbe,
+                      'SitzeFinalBSW':textFarbe,
+                      'Dummy':kachelFarbe,'Rest':kachelFarbe}    
 # Koalitionsrechner 
 @app.callback(
     Output("Koalitionsrechner","figure"),
@@ -375,6 +385,7 @@ def Koalitionsrechner(switchesInput,dropdownUmfrage):
                                  "variable":"Partei"},inplace = True)
      
      cols = subSingle['Partei'].map(sitze_party_colors)
+     cols_text = subSingle['Partei'].map(sitze_party_colors_text)
      fig = go.Figure()
      fig.add_trace(
                    go.Pie(
@@ -387,7 +398,7 @@ def Koalitionsrechner(switchesInput,dropdownUmfrage):
                                         line=dict(color=kachelFarbe, width=3)),
                           sort = False,
                           textinfo = "value",
-                          textfont= dict(color = kachelFarbe) ,
+                          textfont= dict(color = kachelFarbe,size = 24 ) ,
                           hoverinfo="none",
                           )
                    )     
@@ -396,8 +407,7 @@ def Koalitionsrechner(switchesInput,dropdownUmfrage):
                        paper_bgcolor = kachelFarbe,
                        font_color = textFarbe,
                        autosize = True,
-                       annotations =[dict(text=f'{int(summe)} von 45 benötigten Mandaten', x=0.5, y=0.4, font_size=20, showarrow=False)])
-#     fig.add_hline(y=44,line_width=1.5, line_dash="dash", line_color="gray")
+                       annotations =[dict(text=f'{int(summe)} von 88 Mandaten.<br>Einfache Mehrheit bei 45 Mandaten.', x=0.5, y=0.4, font_size=20, showarrow=False)])
      return fig 
     
 
