@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+#%% Datenimport und Aufbereitung
 import pandas as pd
 import numpy as np
 import plotly.express as px
@@ -82,12 +83,12 @@ df["Umfrage"] = df["Datum_str"] + " " + df["Institut"]
 
 
 # Sitze für alle # ist outdated sobald umrechungsverfahren fertig ist
-for col in Parteien:
-    df[f"Sitze{col}"] = df[col] * 88 / 100
+#for col in Parteien:
+#    df[f"Sitze{col}"] = df[col] * 88 / 100
 
 
 
-#%% Hare/Niemeyer
+# Hare/Niemeyer
 # Erst werden die Sitze normal berechne (Prozent [eigentlich absolute Stimmen] * 88 / 100)
 # Dann wird die Differenz zur Richtgröße 88 (hehe) berechnet.
 # Die Parteien mit den größten Restwerten hinter dem Komma bekommen ein weiteres Mandat
@@ -415,3 +416,5 @@ if __name__ == '__main__':
     app.run(debug=True,port=8052)
 
 
+
+# %%
